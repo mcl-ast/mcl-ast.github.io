@@ -1,4 +1,4 @@
-﻿(function() {
+(function() {
 	var url = document.URL,
 		mymclURL = 'http://multcolib.bibliocommons.com',
 		opacURL = 'http://catalog.multcolib.org',
@@ -168,7 +168,6 @@
 				break;
 			}
 		}
-
 		// if there's a link for more copies, use that...
 		for (i = 0; i < forms.length; i += 1) {
 			links = forms[i].getElementsByTagName('input');
@@ -192,7 +191,7 @@
 
 			// If no external link, use info on current page
 			for (i = 0; i < tables.length; i += 1) {
-				if (tables[i].getAttribute('class') === 'bibItems') {
+				if (tables[i].className === 'bibItems') {
 					trs = tables[i].getElementsByTagName('tr');
 					for (j = 0; j < trs.length; j += 1) {
 						tds = trs[j].getElementsByTagName('td');
@@ -207,6 +206,17 @@
 							item.callNumber[item.callNumber.length] = cleanCall;
 						}
 					}
+				} else if (tables[i].className === 'bibHoldings') { // case for periodical
+					trs = tables[i].getElementsByTagName('tr');
+					Array.prototype.forEach.call(trs, function(tr,i,trs){
+						tds = tr.getElementsByTagName('td');
+						if (tds.length !== 0 && tds[0].innerHTML.indexOf('Call No.') > -1 && tds[1].innerHTML.indexOf('Periodical') > -1) {
+							if (trs[i + 1].innerHTML.indexOf('Central') > -1) {
+								item.callNumber[item.callNumber.length] = cleanHTML(tds[1].innerHTML);
+								item.location[item.location.length] = cleanHTML(trs[i + 1].getElementsByTagName('td')[1].innerHTML);
+							}
+						}
+					});
 				}
 			}
 			if (item.location.length < 1) {
@@ -230,7 +240,7 @@
 		}
 		window.localStorage.retrievalSelectionScript = JSON.stringify({
 			version: scriptInfo.version,
-			script: '(function(){function a(e){var t,n=[],r=[],i,s,o;if(e.length>2e3){i={};t=JSON.parse(e);for(s=0;s<t.location.length;s+=1){if(t.location[s].search(/Closed|Reference/)>-1)break}o=s||0;for(s in t){if(Object.prototype.toString.call(t[s])==="[object Array]"){i[s]=[t[s][o]]}else{i[s]=t[s]}}alert("Unfortunately the list of items was too long and the first listed item will be offered in the next window.  "+"Please give more specific instructions in the notes field of the form if this item is not what you need.");e=JSON.stringify(i)}return e}function f(e){e=a(e);window.prompt("Copy to clipboard: Ctrl+C, Enter",e)}function l(){alert("There are no available copies of this title.")}function c(e){return new RegExp("^"+e.replace(/\\./g,"\\\\.").replace(/\\//g,"\\\\/"))}function h(){var e,t,n,r,u,a,c,h,p,d;var v=document.createElement("div");v.innerHTML=this.responseText;var m=v.getElementsByTagName("h1");for(h=0;h<m.length;h+=1){if(m[h].getAttribute("id")==="aria_bib_title")i.title=s(m[h].innerHTML);d=m[h].getAttribute("class")||m[h].className;if(d==="group_heading"&&m[h].innerHTML.search("Not available at this time")===-1){e=m[h].nextSibling;while(e.tagName!=="TABLE")e=e.nextSibling;t=e.getElementsByTagName("th");n=e.getElementsByTagName("td");for(p=0;p<t.length;p+=1){switch(t[p].innerHTML){case"Collection":r=p;break;case"Call Number":u=p;break;case"Call No.":u=p;break;default:break}}for(p=0;p<n.length;p+=t.length){if(r!==undefined&&n[p+r].innerHTML.indexOf("Central")>-1&&o(n[p+r].innerHTML+n[p+u].innerHTML)){i.location.push(s(n[p+r].innerHTML));if(u!==undefined)i.callNumber.push(s(n[p+u].innerHTML))}}}}if(i.location.length<1){l();return}f(JSON.stringify(i))}function p(){var e=document.createElement("div");e.innerHTML=this.responseText;var t=e.getElementsByTagName("table")[0];var n=t.getElementsByTagName("td");var r,u,a,c;for(r=0;r<n.length;r+=3){a=s(n[r].innerHTML);c=n[r+1].getElementsByTagName("a");if(c.length===0)continue;c=c[0].innerHTML;if(n[r].innerHTML.indexOf("Central")>-1&&o(a+c)){i.location[i.location.length]=a;i.callNumber[i.callNumber.length]=c}}if(i.location.length<1){l();return}f(JSON.stringify(i))}var e=document.URL,t="http://multcolib.bibliocommons.com",n="http://catalog.multcolib.org",r,i={location:[],callNumber:[],title:""},s=function(e){return e.replace(/^\\s+|[\\s-]+$|<!--[\\w\\s]+-->|<[^>]+>|&nbsp;\\s?/g,"").replace("&","&").replace(/\\s+$/,"")},o=function(){var e=[];return function(n){var r=0,i=e.length;for(;r<i;r+=1){if(e[r]===n)return false}e[i]=n;return true}}(),u={version:"0.1"};if(e.match(c(t))){e=t+document.getElementById("circ_info_trigger").getAttribute("href");r=new XMLHttpRequest;r.onload=h;r.open("get",e,true);r.send()}else if(e.match(c(n))){var d=document.getElementsByTagName("td"),v=document.getElementsByTagName("form"),m=false,g,y,b;for(y=0;y<d.length;y+=1){if(d[y].innerHTML==="Title"){i.title=s(d[y+1].innerHTML);break}}for(y=0;y<v.length;y+=1){g=v[y].getElementsByTagName("input");for(b=0;b<g.length;b+=1){if(g[b].getAttribute("value")&&g[b].getAttribute("value").indexOf("View additional copies")>-1){m=true;e=v[y].getAttribute("action");r=new XMLHttpRequest;r.onload=p;r.open("post",e);r.send();break}}if(m)break}if(!m){var w=document.getElementsByTagName("table"),E,S,x;for(y=0;y<w.length;y+=1){if(w[y].getAttribute("class")==="bibItems"){E=w[y].getElementsByTagName("tr");for(b=0;b<E.length;b+=1){d=E[b].getElementsByTagName("td");if(d.length===0)continue;S=s(d[0].innerHTML);x=s(d[1].innerHTML);if(d.length>0&&d[0].innerHTML.indexOf("Central")>-1&&d[2].innerHTML.indexOf("DUE")===-1&&o(S+x)){i.location[i.location.length]=S;i.callNumber[i.callNumber.length]=x}}}}if(i.location.length<1){l();return}f(JSON.stringify(i))}}})()'
+			script: '(function(){function a(e){var t,n=[],r=[],i,s,o;if(e.length>2e3){i={};t=JSON.parse(e);for(s=0;s<t.location.length;s+=1){if(t.location[s].search(/Closed|Reference/)>-1)break}o=s||0;for(s in t){if(Object.prototype.toString.call(t[s])==="[object Array]"){i[s]=[t[s][o]]}else{i[s]=t[s]}}alert("Unfortunately the list of items was too long and the first listed item will be offered in the next window.  "+"Please give more specific instructions in the notes field of the form if this item is not what you need.");e=JSON.stringify(i)}return e}function f(e){e=a(e);window.prompt("Copy to clipboard: Ctrl+C, Enter",e)}function l(){alert("There are no available copies of this title.")}function c(e){return new RegExp("^"+e.replace(/\./g,"\\.").replace(/\//g,"\\/"))}function h(){var e,t,n,r,u,a,c,h,p,d;var v=document.createElement("div");v.innerHTML=this.responseText;var m=v.getElementsByTagName("h1");for(h=0;h<m.length;h+=1){if(m[h].getAttribute("id")==="aria_bib_title")i.title=s(m[h].innerHTML);d=m[h].getAttribute("class")||m[h].className;if(d==="group_heading"&&m[h].innerHTML.search("Not available at this time")===-1){e=m[h].nextSibling;while(e.tagName!=="TABLE")e=e.nextSibling;t=e.getElementsByTagName("th");n=e.getElementsByTagName("td");for(p=0;p<t.length;p+=1){switch(t[p].innerHTML){case"Collection":r=p;break;case"Call Number":u=p;break;case"Call No.":u=p;break;default:break}}for(p=0;p<n.length;p+=t.length){if(r!==undefined&&n[p+r].innerHTML.indexOf("Central")>-1&&o(n[p+r].innerHTML+n[p+u].innerHTML)){i.location.push(s(n[p+r].innerHTML));if(u!==undefined)i.callNumber.push(s(n[p+u].innerHTML))}}}}if(i.location.length<1){l();return}f(JSON.stringify(i))}function p(){var e=document.createElement("div");e.innerHTML=this.responseText;var t=e.getElementsByTagName("table")[0];var n=t.getElementsByTagName("td");var r,u,a,c;for(r=0;r<n.length;r+=3){a=s(n[r].innerHTML);c=n[r+1].getElementsByTagName("a");if(c.length===0)continue;c=c[0].innerHTML;if(n[r].innerHTML.indexOf("Central")>-1&&o(a+c)){i.location[i.location.length]=a;i.callNumber[i.callNumber.length]=c}}if(i.location.length<1){l();return}f(JSON.stringify(i))}var e=document.URL,t="http://multcolib.bibliocommons.com",n="http://catalog.multcolib.org",r,i={location:[],callNumber:[],title:""},s=function(e){return e.replace(/^\s+|[\s-]+$|<!--[\w\s]+-->|<[^>]+>|&nbsp;\s?/g,"").replace("&","&").replace(/\s+$/,"")},o=function(){var e=[];return function(n){var r=0,i=e.length;for(;r<i;r+=1){if(e[r]===n)return false}e[i]=n;return true}}(),u={version:"0.1"};if(e.match(c(t))){e=t+document.getElementById("circ_info_trigger").getAttribute("href");r=new XMLHttpRequest;r.onload=h;r.open("get",e,true);r.send()}else if(e.match(c(n))){var d=document.getElementsByTagName("td"),v=document.getElementsByTagName("form"),m=false,g,y,b;for(y=0;y<d.length;y+=1){if(d[y].innerHTML==="Title"){i.title=s(d[y+1].innerHTML);break}}for(y=0;y<v.length;y+=1){g=v[y].getElementsByTagName("input");for(b=0;b<g.length;b+=1){if(g[b].getAttribute("value")&&g[b].getAttribute("value").indexOf("View additional copies")>-1){m=true;e=v[y].getAttribute("action");r=new XMLHttpRequest;r.onload=p;r.open("post",e);r.send();break}}if(m)break}if(!m){var w=document.getElementsByTagName("table"),E,S,x;for(y=0;y<w.length;y+=1){if(w[y].className==="bibItems"){E=w[y].getElementsByTagName("tr");for(b=0;b<E.length;b+=1){d=E[b].getElementsByTagName("td");if(d.length===0)continue;S=s(d[0].innerHTML);x=s(d[1].innerHTML);if(d.length>0&&d[0].innerHTML.indexOf("Central")>-1&&d[2].innerHTML.indexOf("DUE")===-1&&o(S+x)){i.location[i.location.length]=S;i.callNumber[i.callNumber.length]=x}}}else if(w[y].className==="bibHoldings"){E=w[y].getElementsByTagName("tr");Array.prototype.forEach.call(E,function(e,t,n){d=e.getElementsByTagName("td");if(d.length!==0&&d[0].innerHTML.indexOf("Call No.")>-1&&d[1].innerHTML.indexOf("Periodical")>-1){if(n[t+1].innerHTML.indexOf("Central")>-1){i.callNumber[i.callNumber.length]=s(d[1].innerHTML);i.location[i.location.length]=s(n[t+1].getElementsByTagName("td")[1].innerHTML)}}})}}if(i.location.length<1){l();return}f(JSON.stringify(i))}}})()'
 		});
 	} 
 	// END cut for minimization
