@@ -1,5 +1,5 @@
 javascript:(function() {
-	var url = 'http://localhost/~joelkraft/Jobs/Multco/retrieval_upgrade_nov-2013/bookmarklet.js',
+	var url = 'http://mcl-ast.github.io/gather.beta.js',
 		noCache = '?nc=' + (parseInt(Math.random() * 100000000000)).toString(),
 		head = document.getElementsByTagName('head')[0],
 		createAndAppendScriptTag = function createAndAppendScriptTag(attrs) {
@@ -12,8 +12,7 @@ javascript:(function() {
 			return script;
 		},
 		deleteGlobal = function deleteGlobal() {
-			delete window.GLOBAL_RETRIEVAL_BOOKMARKLET_SCRIPT
-;
+			delete window.GLOBAL_RETRIEVAL_BOOKMARKLET_SCRIPT;
 		},
 		i = 1;	
 
